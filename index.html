@@ -1,43 +1,162 @@
-<!doctype html>
-<html>
-  <head>
-    <title>Proposal</title>
-  </head>
-  <body>
-   <h1>Project Overview</h1> 
-<p>Create an interactive to-do list that allows users to add, edit, delete, and reorder tasks using drag-and-drop functionality. 
-  The project will use HTML, CSS, and JavaScript.</p>
-  
-<h2>Functionality/features</h2> 
-<ul style="list-style-type:disc;">
-  <li>Add Tasks – Users can input a task and add it to the list.</li>
-  <li>Edit Tasks – Users can modify existing tasks.</li>
-  <li>Delete Tasks – Tasks can be removed individually.</li>
-  <li>Drag and Drop Reordering – Users can rearrange tasks by dragging them.</li>
-  <li>Task Categories (Optional) – Users can organize tasks under different sections (e.g., Work, important to least important, Personal).</li>
-  <li>Animations & Styling – Use CSS transitions to make interactions smooth.</li>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taskshift</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 400px;
+    }
+    h2 {
+      text-align: center;
+    }
+    .input-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .input-container input,
+    .input-container select {
+      flex: 1;
+      padding: 10px;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      background: #e0e0e0;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: grab;
+      transition: background 0.3s ease;
+    }
+    li.dragging {
+      opacity: 0.5;
+    }
+    .buttons button {
+      margin-left: 5px;
+    }
+    .category {
+      margin-top: 20px;
+    }
+    .category h3 {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Taskshift</h2>
+    <div class="input-container">
+      <input type="text" id="taskInput" placeholder="Add a new task..." />
+      <select id="categorySelect">
+        <option value="Work">Work</option>
+        <option value="Personal">Personal</option>
+        <option value="Important">Important</option>
+      </select>
+      <button onclick="addTask()">Add</button>
+    </div>
+    <div class="category">
+      <h3>Work</h3>
+      <ul id="Work" class="droppable"></ul>
+    </div>
+    <div class="category">
+      <h3>Personal</h3>
+      <ul id="Personal" class="droppable"></ul>
+    </div>
+    <div class="category">
+      <h3>Important</h3>
+      <ul id="Important" class="droppable"></ul>
+    </div>
+  </div>
 
-<h2>Usage of programming languages:</h2> 
-<ul style="list-style-type:disc;">
-  <li>HTML – Structure of the to-do list.</li>
-  <li>CSS – Styling for a clean UI, hover effects, and transitions.</li>
-  <li>JavaScript – Logic for adding, deleting, editing, and dragging tasks.</li>
+  <script>
+    function addTask() {
+      const input = document.getElementById("taskInput");
+      const category = document.getElementById("categorySelect").value;
+      const text = input.value.trim();
+      if (text === "") return;
+      const li = createTaskElement(text);
+      li.dataset.category = category;
+      document.getElementById(category).appendChild(li);
+      input.value = "";
+    }
 
-<h2>Possible future features</h2>
-<ul style="list-style-type:square;">
-  <li>Deadline Reminders – Show alerts for overdue tasks.</li>
-  <li>Progress Bar – Display completion percentage.</li>
-</ul>
+    function createTaskElement(text) {
+      const li = document.createElement("li");
+      li.draggable = true;
+      li.textContent = text;
 
-<h2>Project proposal check list</h2>
-    <ol type="1">
-      <li>Name: TaskShift</li>
-      <li>Team members: Just me</li>
-      <li>Application Overview: Generic Task list</li>
-      <li>Technology Overview:Web application using CSS, HTML, Javascript and hosted on Github pages</li>
-      <li>Proposal Last Updated: 4/9/25</li>
-    </ol>  
+      const btnContainer = document.createElement("span");
+      btnContainer.className = "buttons";
 
-    <p>Author:Jamison Sisouvankham</p>
-  </body>
+      const editBtn = document.createElement("button");
+      editBtn.textContent = "Edit";
+      editBtn.onclick = () => editTask(li);
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "Delete";
+      deleteBtn.onclick = () => li.remove();
+
+      btnContainer.appendChild(editBtn);
+      btnContainer.appendChild(deleteBtn);
+      li.appendChild(btnContainer);
+
+      li.addEventListener("dragstart", () => li.classList.add("dragging"));
+      li.addEventListener("dragend", () => li.classList.remove("dragging"));
+
+      return li;
+    }
+
+    document.querySelectorAll(".droppable").forEach(list => {
+      list.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        const dragging = document.querySelector(".dragging");
+        const afterElement = getDragAfterElement(list, e.clientY);
+        if (afterElement == null) {
+          list.appendChild(dragging);
+        } else {
+          list.insertBefore(dragging, afterElement);
+        }
+      });
+    });
+
+    function getDragAfterElement(container, y) {
+      const elements = [...container.querySelectorAll("li:not(.dragging)")];
+      return elements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child };
+        } else {
+          return closest;
+        }
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    function editTask(li) {
+      const newText = prompt("Edit task:", li.firstChild.textContent);
+      if (newText !== null && newText.trim() !== "") {
+        li.firstChild.textContent = newText.trim();
+      }
+    }
+  </script>
+</body>
 </html>
