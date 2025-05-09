@@ -1,4 +1,4 @@
-# Class-Product-Proposal References
+# Class-Product-Proposal References and credits
 https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/drag_event (This was what helped me when it came to drag and drop in addition to the videos)
 https://wearedopethemes.medium.com/30-days-of-javascript-building-a-simple-todo-app-with-javascript-day-8-dabb55a30ee9 & https://www.w3schools.com/jsref/event_onclick.asp (These helped with the button commands and onclick functions) 
 
